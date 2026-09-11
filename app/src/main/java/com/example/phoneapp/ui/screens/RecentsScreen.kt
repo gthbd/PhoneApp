@@ -17,7 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,9 +37,8 @@ import com.example.phoneapp.ui.screens.components.FilterDropdownRow
 import com.yourapp.phoneapp.ui.theme.HyperColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
 @Composable
-fun RecentsScreen() {
+fun RecentsScreen(onEntryClick: (CallLogEntry) -> Unit) {
     val context = LocalContext.current
 
     val callLogEntries by produceState(
@@ -47,6 +49,8 @@ fun RecentsScreen() {
             CallLogRepository.getCallLogEntries(context)
         }
     }
+
+    var showDialpad by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -88,23 +92,29 @@ fun RecentsScreen() {
                 contentPadding = PaddingValues(bottom = 88.dp)
             ) {
                 items(callLogEntries, key = { it.id }) { entry ->
-                    CallHistoryItem(entry = entry)
+                    CallHistoryItem(entry = entry, onDetailClick = onEntryClick)
                 }
             }
         }
 
-        FloatingActionButton(
-            onClick = { /* TODO: mở màn hình bàn phím số */ },
-            containerColor = HyperColors.AccentGreen,
-            contentColor = HyperColors.Background,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.apps),
-                contentDescription = "Mở bàn phím số"
-            )
+        if (showDialpad) {
+            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                DialpadScreen(onClose = { showDialpad = false })
+            }
+        } else {
+            FloatingActionButton(
+                onClick = { showDialpad = true },
+                containerColor = HyperColors.AccentGreen,
+                contentColor = HyperColors.Background,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.apps),
+                    contentDescription = "Mở bàn phím số"
+                )
+            }
         }
     }
 }

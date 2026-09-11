@@ -20,27 +20,45 @@ object CallLogRepository {
         return groupConsecutiveCalls(rawRows)
     }
 
+    /**
+     * Lấy toàn bộ lịch sử cuộc gọi của 1 số điện thoại cụ thể (không gộp) — dùng cho màn hình chi tiết.
+     */
+    fun getCallHistoryForNumber(context: Context, phoneNumber: String): List<CallLogEntry> {
+        return queryRawCallLog(context, filterNumber = phoneNumber).map { row ->
+            CallLogEntry(
+                id = row.timestampMillis,
+                displayName = row.displayName,
+                phoneNumber = row.phoneNumber,
+                callType = row.callType,
+                date = formatDateTime(row.timestampMillis)
+            )
+        }
+    }
+
     private data class RawCallLogRow(
         val displayName: String,
+        val phoneNumber: String,
         val callType: CallType,
         val timestampMillis: Long
     )
 
-    private fun queryRawCallLog(context: Context): List<RawCallLogRow> {
+    private fun queryRawCallLog(context: Context, filterNumber: String? = null): List<RawCallLogRow> {
         val projection = arrayOf(
             CallLog.Calls.CACHED_NAME,
             CallLog.Calls.NUMBER,
             CallLog.Calls.TYPE,
             CallLog.Calls.DATE
         )
+        val selection = if (filterNumber != null) "${CallLog.Calls.NUMBER} = ?" else null
+        val selectionArgs = if (filterNumber != null) arrayOf(filterNumber) else null
 
         val rows = mutableListOf<RawCallLogRow>()
 
         context.contentResolver.query(
             CallLog.Calls.CONTENT_URI,
             projection,
-            null,
-            null,
+            selection,
+            selectionArgs,
             "${CallLog.Calls.DATE} DESC"
         )?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)
@@ -57,6 +75,7 @@ object CallLogRepository {
                 rows.add(
                     RawCallLogRow(
                         displayName = cachedName?.takeIf { it.isNotBlank() } ?: number,
+                        phoneNumber = number,
                         callType = mapCallType(type),
                         timestampMillis = timestamp
                     )
@@ -86,7 +105,7 @@ object CallLogRepository {
 
             while (
                 index + groupSize < rows.size &&
-                rows[index + groupSize].displayName == current.displayName
+                rows[index + groupSize].phoneNumber == current.phoneNumber
             ) {
                 groupSize++
             }
@@ -95,6 +114,7 @@ object CallLogRepository {
                 CallLogEntry(
                     id = idCounter++,
                     displayName = current.displayName,
+                    phoneNumber = current.phoneNumber,
                     callType = current.callType,
                     date = formatDate(current.timestampMillis),
                     missedCount = groupSize
@@ -108,7 +128,10 @@ object CallLogRepository {
     }
 
     private fun formatDate(timestampMillis: Long): String {
-        val formatter = SimpleDateFormat("MMM d", Locale.getDefault())
-        return formatter.format(Date(timestampMillis))
+        return SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestampMillis))
+    }
+
+    private fun formatDateTime(timestampMillis: Long): String {
+        return SimpleDateFormat("MMM d, HH:mm", Locale.getDefault()).format(Date(timestampMillis))
     }
 }

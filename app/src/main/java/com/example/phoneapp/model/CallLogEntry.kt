@@ -7,6 +7,7 @@ enum class CallType {
 data class CallLogEntry(
     val id: Long,
     val displayName: String,   // tên đã lưu HOẶC số điện thoại nếu chưa lưu
+    val phoneNumber: String,
     val callType: CallType,
     val date: String,          // ví dụ "Sep 4"
     // ví dụ "Vietnam" / "Hanoi City"

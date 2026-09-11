@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.example.phoneapp.model.CallLogEntry
 import com.yourapp.phoneapp.ui.theme.HyperColors
 
 enum class DialerTab {
@@ -55,6 +56,13 @@ fun DialerMainScreen() {
         return
     }
 
+    // Khi khác null, hiển thị màn hình chi tiết cuộc gọi thay cho toàn bộ Scaffold bên dưới.
+    var selectedCallEntry by remember { mutableStateOf<CallLogEntry?>(null) }
+    selectedCallEntry?.let { entry ->
+        CallDetailScreen(entry = entry, onBack = { selectedCallEntry = null })
+        return
+    }
+
     var selectedTab by remember { mutableStateOf(DialerTab.RECENTS) }
 
     Scaffold(
@@ -72,7 +80,9 @@ fun DialerMainScreen() {
                 .padding(innerPadding)
         ) {
             when (selectedTab) {
-                DialerTab.RECENTS -> RecentsScreen()
+                DialerTab.RECENTS -> RecentsScreen(
+                    onEntryClick = { selectedCallEntry = it }
+                )
                 DialerTab.CONTACTS -> ContactsScreen()
             }
         }
