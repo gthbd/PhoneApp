@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.example.phoneapp.model.CallLogEntry
+import com.example.phoneapp.model.ContactEntry
 import com.yourapp.phoneapp.ui.theme.HyperColors
 
 enum class DialerTab {
@@ -26,7 +27,9 @@ enum class DialerTab {
 
 private val REQUIRED_PERMISSIONS = arrayOf(
     Manifest.permission.READ_CALL_LOG,
-    Manifest.permission.READ_CONTACTS
+    Manifest.permission.READ_CONTACTS,
+    Manifest.permission.CALL_PHONE,
+    Manifest.permission.WRITE_CONTACTS
 )
 
 @Composable
@@ -63,6 +66,22 @@ fun DialerMainScreen() {
         return
     }
 
+    var selectedContact by remember { mutableStateOf<ContactEntry?>(null) }
+    selectedContact?.let { contact ->
+        ContactDetailScreen(contact = contact, onBack = { selectedContact = null })
+        return
+    }
+
+    var showAddContact by remember { mutableStateOf(false) }
+    if (showAddContact) {
+        AddContactScreen(
+            onClose = { showAddContact = false },
+            onSaved = { showAddContact = false }
+        )
+        return
+    }
+
+
     var selectedTab by remember { mutableStateOf(DialerTab.RECENTS) }
 
     Scaffold(
@@ -83,7 +102,10 @@ fun DialerMainScreen() {
                 DialerTab.RECENTS -> RecentsScreen(
                     onEntryClick = { selectedCallEntry = it }
                 )
-                DialerTab.CONTACTS -> ContactsScreen()
+                DialerTab.CONTACTS -> ContactsScreen(
+                    onContactClick = { selectedContact = it },
+                    onAddContactClick = { showAddContact = true }
+                )
             }
         }
     }

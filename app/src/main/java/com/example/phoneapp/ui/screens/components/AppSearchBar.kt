@@ -1,6 +1,7 @@
 package com.example.phoneapp.ui.screens.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -17,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yourapp.phoneapp.ui.theme.HyperColors
@@ -25,7 +29,11 @@ import com.yourapp.phoneapp.ui.theme.HyperColors
  * Thanh tìm kiếm dùng chung cho Recents và Contacts — chỉ khác placeholder text.
  */
 @Composable
-fun AppSearchBar(placeholder: String) {
+fun AppSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    placeholder: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,10 +50,23 @@ fun AppSearchBar(placeholder: String) {
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = placeholder,
-            fontSize = 16.sp,
-            color = HyperColors.TextSecondary
-        )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            if (query.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    fontSize = 16.sp,
+                    color = HyperColors.TextSecondary
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                singleLine = true,
+                textStyle = TextStyle(color = HyperColors.TextPrimary, fontSize = 16.sp),
+                cursorBrush = SolidColor(HyperColors.TextPrimary),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }

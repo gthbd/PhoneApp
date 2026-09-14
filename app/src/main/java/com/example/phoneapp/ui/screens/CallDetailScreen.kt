@@ -2,7 +2,6 @@ package com.example.phoneapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,7 @@ import com.example.phoneapp.data.CallLogRepository
 import com.example.phoneapp.model.CallLogEntry
 import com.example.phoneapp.model.CallType
 import com.example.phoneapp.ui.screens.components.CallDirectionIndicator
+import com.example.phoneapp.util.PhoneCallHelper
 import com.yourapp.phoneapp.ui.theme.HyperColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -118,7 +118,7 @@ fun CallDetailScreen(entry: CallLogEntry, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 12.dp)
-                .clickable { /* TODO: thực hiện cuộc gọi thật tới entry.phoneNumber */ }
+                .clickable { PhoneCallHelper.placeCall(context, entry.phoneNumber) }
         ) {
             Box(
                 modifier = Modifier
